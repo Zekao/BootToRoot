@@ -230,7 +230,7 @@ ft_fun/0000750000175000001440000000000012575653666011066 5ustar  nnmusersft_fun/
 The file contain c function, after using file on it we can see it's a tar file
 so we can extract the content.
 
-```
+```bash
 ➜  ~ file fun
 fun: POSIX tar archive (GNU)
 ```
@@ -252,7 +252,7 @@ mv .txt file750.txt
 ```
 
 In the 750 file, we can see a C function 
-```
+```c
 int main() {
 	printf("M");
 	printf("Y");
@@ -391,7 +391,7 @@ scp laurie@192.168.56.103:~/bomb /tmp/
 ```
 
 For phase one the function is the following:
-```
+```c
 void phase_1(undefined4 param_1)
 
 {
@@ -416,7 +416,7 @@ Phase 1 defused. How about the next one?
 ```
 
 The next phase will be:
-```bash
+```c
 void phase_2(undefined4 param_1)
 
 {
@@ -453,7 +453,7 @@ Multiply the fifth by 6 and get the sixth number.
 1 2 6 24 120 720
 
 The third stage is the follwing:
-```bash
+```c
 void phase_3(char *param_1)
 
 {
@@ -528,12 +528,12 @@ void phase_3(char *param_1)
 ```
 
 We can see that we need to provide three argument, the first one will be the switch case choose, the second is letter that will be compared at the end and the last one will be the number that will skip bomb explosion. So we have 7 combinaison working, here we will use the first one:
-```
+```bash
 0 q 777
 ```
 
 The phase four will be
-```
+```c
 void phase_4(char *param_1)
 {
   int iVar1;
@@ -563,29 +563,43 @@ int func4(int param_1)
 The func4 seem to be a fibonnaci function, so we can deduce we need to provide only one number corresponding to the number of iteration needed to obtain 55, and 9 iteration is needed to obtain 55.
 
 The phase 5 function is the following:
-```
-void phase_5(int param_1)
-{
-  int iVar1;
-  undefined local_c [6];
-  undefined local_6;
-  
-  iVar1 = string_length(param_1);
-  if (iVar1 != 6) {
+```c
+void phase_5() {
+  read_input(stdin, &str);
+  if (strlen(str) != 6) {
     explode_bomb();
   }
-  iVar1 = 0;
-  do {
-    local_c[iVar1] = (&array.123)[(char)(*(byte *)(iVar1 + param_1) & 0xf)];
-    iVar1 = iVar1 + 1;
-  } while (iVar1 < 6);
-  local_6 = 0;
-  iVar1 = strings_not_equal(local_c,"giants");
-  if (iVar1 != 0) {
-    explode_bomb();
+  else {
+    int i = 0;
+    char *indexMe = "isrveawhobpnutfg";
+    do {
+      str[i] = indexMe[str[i] & 0xf];
+      i++;
+    } while (edx <= 5);
+    if strcmp(str, "giants" != 0) {
+      explode_bomb();
+    }
   }
   return;
 }
 ```
 
-The function wait a 6 length string, 
+The function wait a 6 length string and will compare it to "giants". We can see that the string is encrypted with a simple xor with 0xf. So we can decrypt it with the following python script:
+```python
+#!/usr/bin/env python3
+
+if __name__ == "__main__":
+    enc = "giants"
+    dec = "isrveawhobpnutfg"
+
+    corr_table = {}
+    print(type(corr_table))
+    for i in 'abcdefghijklmnopqrstuvwxyz':
+        if dec[ord(i) & 0xf] in 'giants':
+            corr_table[dec[ord(i) & 0xf]] = i
+            print(dec[ord(i) & 0xf], '->', i)
+    
+    print(''.join([corr_table[i] for i in enc]))
+```
+
+The output will be "opukmq" and we can provide it to the bomb to access the to the last phase.
