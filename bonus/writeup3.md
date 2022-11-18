@@ -1,10 +1,10 @@
 ### Writeup 3
+>suEXEC privilege elevation 
 
 When we scanned the machine with nikto we saw that the machine is using `Server: Apache/2.2.22 (Ubuntu)`
 
 So we searched for exploits for this version of apache and found this exploit: https://www.exploit-db.com/exploits/27397
 
->suEXEC privilege elevation 
 
 We will have to do an SQL injection to get acces to the machine with this exploit
 
