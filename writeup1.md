@@ -586,18 +586,14 @@ void phase_5() {
 
 The function wait a 6 length string and will compare it to "giants". We can see that the string is encrypted with a simple xor with 0xf. So we can decrypt it with the following python script:
 ```python
-#!/usr/bin/env python3
-
 if __name__ == "__main__":
     enc = "giants"
     dec = "isrveawhobpnutfg"
 
     corr_table = {}
-    print(type(corr_table))
     for i in 'abcdefghijklmnopqrstuvwxyz':
         if dec[ord(i) & 0xf] in 'giants':
             corr_table[dec[ord(i) & 0xf]] = i
-            print(dec[ord(i) & 0xf], '->', i)
     
     print(''.join([corr_table[i] for i in enc]))
 ```
