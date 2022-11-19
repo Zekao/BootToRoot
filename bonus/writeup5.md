@@ -42,3 +42,4 @@ adduser zaz
 cd ../zaz
 ...
 ```
+>homes filesystem should be encrypted in the ISO, but none of them is. We can easily access any content on the server without restriction. We are officially root of the machine.
