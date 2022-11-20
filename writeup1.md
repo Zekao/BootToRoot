@@ -217,12 +217,9 @@ After injecting our webshell, we can get to https://192.168.56.103/forum/templat
 To check if the shell is right:
 
 ```bash
-uname -a
+$ uname -a
+Linux BornToSecHackMe 3.2.0-91-generic-pae #129-Ubuntu SMP Wed Sep 9 11:27:47 UTC 2015 i686 i686 i386 GNU/Linux
 ```
-
-> ```bash
-> Linux BornToSecHackMe 3.2.0-91-generic-pae #129-Ubuntu SMP Wed Sep 9 11:27:47 UTC 2015 i686 i686 i386 GNU/Linux
-> ```
 
 By looking in home folder, we can see a LOOKATME folder in /home directory.
 
@@ -245,7 +242,8 @@ lmezard:G!@M6f4Eatau{sF"
 
 ## Exploiting the FTP
 
-We gave a password file containing the potential session credential fot lmezard user. When we try to login to the lmezard session it doesn't work but as we previously see we have a FTP service running in the target machine. We can try these credential to check if session work.
+We gave a password file containing the potential session credential for lmezard user. When we try to login to the lmezard session it doesn't work but as we previously see we have a FTP service running in the target machine.
+We can try these credential to check if the session works.
 
 ```bash
 ➜  ~ ftp
@@ -267,7 +265,13 @@ ftp> dir
 226 Directory send OK.
 ```
 
-Yes, the credential work to log into the ftp server. When we log into the server, we can see two file, one is a README and the other one is a fun file, we will use get to download them locally
+Yes, the credential works to log into the ftp server.
+After logging in, we can see two file:
+
+1. A README
+1. A `fun` file
+
+we will use get to download them locally
 
 ```bash
 ftp> get README
@@ -302,13 +306,7 @@ ft_fun/0000750000175000001440000000000012575653666011066 5ustar  nnmusersft_fun/
 [...]
 ```
 
-The file contain c function, after using file on it we can see it's a tar file
-so we can extract the content.
-
-```bash
-➜  ~ file fun
-fun: POSIX tar archive (GNU)
-```
+## Understanding the fun file
 
 We can see file pattern in each file with number, we have to reorganise file to sort them in right order. This pretty straightforward script rename file with packet order number
 
@@ -368,71 +366,36 @@ We can get all getme function to get the password.
 ```bash
 ➜  cat {0..750}.txt > mybigfile.txt
 ➜  cat mybigfile.txt | grep -A 2 getme
-//file4char getme1() {
-
-//file5	return 'I';
---
-//file36char getme2() {
-
-//file37	return 'h';
---
-//file55char getme3() {
-
-//file56	return 'e';
---
-//file114char getme4() {
-
-//file115	return 'a';
---
-//file367char getme5() {
-
-//file368	return 'r';
---
-//file520char getme6() {
-
-//file521	return 't';
---
-//file735char getme7() {
-
-//file736	return 'p';
---
-char getme8() {
-	return 'w';
-}
---
-char getme9() {
-	return 'n';
-}
---
-char getme10() {
-	return 'a';
-}
---
-char getme11() {
-	return 'g';
-}
---
-char getme12()After getting
-{
-	return 'e';
---
-	printf("%c",getme1());
-	printf("%c",getme2());
-	printf("%c",getme3());
-	printf("%c",getme4());
-	printf("%c",getme5());
-	printf("%c",getme6());
-	printf("%c",getme7());
-	printf("%c",getme8());
-	printf("%c",getme9());
-	printf("%c",getme10());
-	printf("%c",getme11());
-	printf("%c",getme12());
-	printf("\n");
-	printf("Now SHA-256 it and submit");
+char getme1 () { return 'I'; }
+char getme2 () { return 'h'; }
+char getme3 () { return 'e'; }
+char getme4 () { return 'a'; }
+char getme5 () { return 'r'; }
+char getme6 () { return 't'; }
+char getme7 () { return 'p'; }
+char getme8 () { return 'w'; }
+char getme9 () { return 'n'; }
+char getme10() { return 'a'; }
+char getme11() { return 'g'; }
+char getme12() { return 'e'; }
+---
+printf("%c",getme1());
+printf("%c",getme2());
+printf("%c",getme3());
+printf("%c",getme4());
+printf("%c",getme5());
+printf("%c",getme6());
+printf("%c",getme7());
+printf("%c",getme8());
+printf("%c",getme9());
+printf("%c",getme10());
+printf("%c",getme11());
+printf("%c",getme12());
+printf("\n");
+printf("Now SHA-256 it and submit");
 ```
 
-As we can see the message is Iheartpwnage, so to finish this challenge we have to hash the password in SHA256 to connect to laurie session.
+As we can see the message is **`Iheartpwnage`**, so to finish this challenge we have to hash the password in SHA256 to connect to laurie session.
 
 https://gchq.github.io/CyberChef/#recipe=SHA2('256',64,160)&input=SWhlYXJ0cHduYWdl
 
@@ -441,6 +404,8 @@ The SHA256 password is
 ```
 330b845f32185747e4f8ca15d40ca59796035c89ea809fb5d30f4da83ecf45a4
 ```
+
+## Exploit the SSH
 
 In the laurie session, we can find two file in the home directory:
 
@@ -467,6 +432,8 @@ We will get this file locally to use ghidra to perform file analysis
 ```bash
 scp laurie@192.168.56.103:~/bomb /tmp/
 ```
+
+## Exploit the bomb
 
 For phase one the function is the following:
 
