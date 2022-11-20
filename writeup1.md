@@ -6,7 +6,7 @@ First, we have a virtual machine with a weak Linux OS, containing a lot of vulne
 
 First when we run OS, we have are in reconnaisance phase, we have to find entrypoint of machine. To do so, we can run nmap on it. As our machine is on a virtualbox preset network. Address range we select is 192.168.56.0/24. We can run nmap on this range to potentially find our target.
 
-This command will perform a ICMP Echo Ping in the specified range 192.168.56.1 -> 192.168.56.254.
+This command will perform a ICMP Echo Ping in the specified range `192.168.56.1 -> 192.168.56.254`.
 
 To use nmap on 42 school computer we have to perform the scan inside a container, the command will be:
 
@@ -19,7 +19,13 @@ docker run --rm -it instrumentisto/nmap -sn -n -PE 192.168.56.0/24
 ```
 
 ```bash
-➜  ~ docker run --rm -it instrumentisto/nmap -sn -n -PE 192.168.56.0/24
+$ docker run --rm -it instrumentisto/nmap -sn -n -PE 192.168.56.0/24
+```
+
+<details>
+<summary>Nmap Logs</summary>
+
+```bash
 Unable to find image 'instrumentisto/nmap:latest' locally
 latest: Pulling from instrumentisto/nmap
 213ec9aee27d: Pull complete
@@ -35,10 +41,15 @@ Host is up (0.00056s latency).
 Nmap scan report for 192.168.56.103
 Host is up (0.00051s latency).
 Nmap done: 256 IP addresses (3 hosts up) scanned in 1.70 seconds
-➜  ~
 ```
 
-We found our target on ip 192.168.56.103. We can now perform a complete scan of our target, to do so the following nmap command will do a Full TCP port scan with service version detection and with default NSE scripts.
+</details>
+
+We found our target on ip 192.168.56.103.
+
+## Port scan
+
+We can now perform a complete scan of our target, to do so the following nmap command will do a Full TCP port scan with service version detection and with default NSE scripts.
 
 ```bash
 # If nmap is installed on your host - https://nmap.org/download
@@ -48,7 +59,8 @@ nmap -T4 -sC -sV -p 1-65535 -sS 192.168.56.103
 docker run --rm -it instrumentisto/nmap -T4 -sC -sV -p 1-65535 -sS 192.168.56.103
 ```
 
-## Port scan
+<details>
+  <summary>Nmap logs</summary>
 
 ```bash
 Starting Nmap 7.93 ( https://nmap.org ) at 2022-11-13 11:32 UTC
@@ -92,11 +104,14 @@ PORT    STATE SERVICE  VERSION
 Service Info: Host: 127.0.1.1; OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
 Host script results:
-|_clock-skew: mean: -3s, deviation: 0s, median: -3s
+|\_clock-skew: mean: -3s, deviation: 0s, median: -3s
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 20.98 seconds
+
 ```
+
+</details>
 
 The finded services are
 
