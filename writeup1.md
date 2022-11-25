@@ -450,23 +450,17 @@ scp laurie@192.168.56.103:~/bomb /tmp/
 
 ## Exploit the bomb
 
-For phase one the function is the following:
+---
 
-```c
-void phase_1(undefined4 param_1)
+### Step 1
 
-{
-  int iVar1;
+| Exercice                          | Resolution Script |
+| --------------------------------- | ----------------- |
+| [step1.c](./scripts/bomb/step1.c) | ❌                |
 
-  iVar1 = strings_not_equal(param_1,"Public speaking is very easy.");
-  if (iVar1 != 0) {
-    explode_bomb();
-  }
-  return;
-}
-```
+So we can deduce for phase one we only have to provide string:
 
-So we can deduce for phase one we only have to provide string "Public speaking is very easy." to go in the next step.
+> `Public speaking is very easy.`
 
 ```bash
 laurie@BornToSecHackMe:~$ ./bomb
@@ -476,29 +470,11 @@ Public speaking is very easy.
 Phase 1 defused. How about the next one?
 ```
 
-The next phase will be:
+### Step 2
 
-```c
-void phase_2(undefined4 param_1)
-
-{
-  int i;
-  int argsToComp [7];
-
-  read_six_numbers(param_1,argsToComp + 1);
-  if (argsToComp[1] != 1) {
-    explode_bomb();
-  }
-  i = 1;
-  do {
-    if (argsToComp[i + 1] != (i + 1) * argsToComp[i]) {
-      explode_bomb();
-    }
-    i = i + 1;
-  } while (i < 6);
-  return;
-}
-```
+| Exercice                          | Resolution Script |
+| --------------------------------- | ----------------- |
+| [step2.c](./scripts/bomb/step2.c) | ❌                |
 
 As we see it's a recursive function. It's a factorial serie. As we need to only provide 6 arguments, this serie is pretty straigtforward to resolve:
 
@@ -512,169 +488,111 @@ Multiply the fourth by 5 and get the fifth number.
 
 Multiply the fifth by 6 and get the sixth number.
 
-1 2 6 24 120 720
+> The answer is:
+>
+> ```
+> 1 2 6 24 120 720
+> ```
 
-The third stage is the follwing:
+### Step 3
 
-```c
-void phase_3(char *param_1)
+| Exercice                          | Resolution Script |
+| --------------------------------- | ----------------- |
+| [step3.c](./scripts/bomb/step3.c) | ❌                |
 
-{
-  int iVar1;
-  char cVar2;
-  uint firstParam;
-  char secParam;
-  int thirdParam;
+We can see that we need to provide three argument:
 
-  iVar1 = sscanf(param_1,"%d %c %d",&firstParam,&secParam,&thirdParam);
-  if (iVar1 < 3) {
-    explode_bomb();
-  }
-  switch(firstParam) {
-  case 0:
-    cVar2 = 'q';
-    if (thirdParam != 777) {
-      explode_bomb();
-    }
-    break;
-  case 1:
-    cVar2 = 'b';
-    if (thirdParam != 214) {
-      explode_bomb();
-    }
-    break;
-  case 2:
-    cVar2 = 'b';
-    if (thirdParam != 755) {
-      explode_bomb();
-    }
-    break;
-  case 3:
-    cVar2 = 'k';
-    if (thirdParam != 251) {
-      explode_bomb();
-    }
-    break;
-  case 4:
-    cVar2 = 'o';
-    if (thirdParam != 160) {
-      explode_bomb();
-    }
-    break;
-  case 5:
-    cVar2 = 't';
-    if (thirdParam != 458) {
-      explode_bomb();
-    }
-    break;
-  case 6:
-    cVar2 = 'v';
-    if (thirdParam != 780) {
-      explode_bomb();
-    }
-    break;
-  case 7:
-    cVar2 = 'b';
-    if (thirdParam != 524) {
-      explode_bomb();
-    }
-    break;
-  default:
-    cVar2 = 'x';
-    explode_bomb();
-  }
-  if (cVar2 != secParam) {
-    explode_bomb();
-  }
-  return;
-}
-```
+1. the first one will be the switch case choose
+1. the second is letter that will be compared at the end
+1. the last one will be the number that will skip bomb explosion
 
-We can see that we need to provide three argument, the first one will be the switch case choose, the second is letter that will be compared at the end and the last one will be the number that will skip bomb explosion. So we have 8 combinaison working, here is the seven possible combinaison:
+So we have 8 combinaison working, here is the seven possible combinaison:
 
-```bash
-0 q 777
-1 b 214
-2 b 755
-3 k 251
-4 o 160
-5 t 458
-6 v 780
-7 b 524
-```
+> 0 q 777
+> 1 b 214
+> 2 b 755
+> 3 k 251
+> 4 o 160
+> 5 t 458
+> 6 v 780
+> 7 b 524
 
-The phase four will be
+### Step 4
 
-```c
-void phase_4(char *param_1)
-{
-  int iVar1;
-  int local_8;
-  0 q 777
-  return;
-}
+| Exercice                          | Resolution Script                   |
+| --------------------------------- | ----------------------------------- |
+| [step4.c](./scripts/bomb/step4.c) | [step4.py](./scripts/bomb/step4.py) |
 
+The func4 seem to be a fibonnaci function.
 
-int func4(int param_1)
-{
-  int iVar1;
-  int iVar2;
+We can deduce we need to provide only one number corresponding to the number of iteration needed to obtain 55:
 
-  if (param_1 < 2) {
-    iVar2 = 1;
-  }
-  else {
-    iVar1 = func4(param_1 + -1);
-    iVar2 = func4(param_1 + -2);
-    iVar2 = iVar2 + iVar1;
-  }
-  return iVar2;
-}
-```
+> **9 iteration** is needed to obtain 55.
 
-The func4 seem to be a fibonnaci function, so we can deduce we need to provide only one number corresponding to the number of iteration needed to obtain 55, and 9 iteration is needed to obtain 55.
+### Step 5
 
-The phase 5 function is the following:
-
-```c
-void phase_5() {
-  read_input(stdin, &str);
-  if (strlen(str) != 6) {
-    explode_bomb();
-  }
-  else {
-    int i = 0;
-    char *indexMe = "isrveawhobpnutfg";
-    do {
-      str[i] = indexMe[str[i] & 0xf];
-      i++;
-    } while (edx <= 5);
-    if strcmp(str, "giants" != 0) {
-      explode_bomb();
-    }
-  }
-  return;
-}
-```
+| Exercice                          | Resolution Script                   |
+| --------------------------------- | ----------------------------------- |
+| [step5.c](./scripts/bomb/step5.c) | [step5.py](./scripts/bomb/step5.py) |
 
 The function wait a 6 length string and will compare it to "giants". We can see that the string is encrypted with a simple xor with 0xf. So we can decrypt it with the following python script:
 
-```python
-if __name__ == "__main__":
-    enc = "giants"
-    dec = "isrveawhobpnutfg"
-
-    corr_table = {}
-    for i in 'abcdefghijklmnopqrstuvwxyz':
-        if dec[ord(i) & 0xf] in 'giants':
-            corr_table[dec[ord(i) & 0xf]] = i
-
-    print(''.join([corr_table[i] for i in enc]))
+```bash
+$ python3 ./scripts/bomb/step5.py
 ```
 
-The output will be "opukmq" and we can provide it to the bomb to access the to the last phase.
+> The output will be "**opukmq**" and we can provide it to the bomb to access the to the last phase.
 
-> TO ADD: The last phase. password: Publicspeakingisveryeasy.126241207201b2149opekmq426135
+### Step 6
+
+For the step 6, we have multiple constraints:
+
+1. 6 digits separated by a space `%d %d %d %d %d %d`
+1. Between 1 and 6, and unique
+1. The hint of the README tells: 4 (it must begin by the 4): `4 %d %d %d %d %d`
+
+So basically, we can just brut-force the standard input to try any combinasion [step6.py](./scripts/bomb/step6.py)
+
+This Python script is creating all cases for this stage (_called `test_setX.txt`_)
+
+To use it:
+
+```bash
+$ python3 ./scripts/bomb/step6.py
+$ for f in ./*.txt; do echo $f; ./bomb $f | tail -1 | grep -v blown; done
+```
+
+> That gives us:
+> `4 2 6 1 3 5`
+
+### Get along with all answers
+
+The README says:
+
+> HINT:
+> P
+> &nbsp;&nbsp;2
+> &nbsp;&nbsp;b
+>
+> o
+> 4
+>
+> NO SPACE IN THE PASSWORD (password is case sensitive).
+
+If we fill this up:
+
+> **P**ublic speaking is very easy.
+> 1 **2** 6 24 120 720
+> 1 **b** 214
+> 9
+> **o**pekmq
+> **4** 2 6 3 1 5
+
+We remove the spaces and newlines:
+
+> **Publicspeakingisveryeasy.126241207201b2149opekmq426135**
+
+### Troubleshooting
 
 ## The Turtle
 
@@ -718,11 +636,10 @@ We're now connected as zaz!
 
 ## Exploit me
 
-  
-  ```bash
-  zaz@BornToSecHackMe:~$ ls -l exploit_me
-  -rwsr-s--- 1 root zaz 4880 Oct  8  2015 exploit_me
-  ```
+```bash
+zaz@BornToSecHackMe:~$ ls -l exploit_me
+-rwsr-s--- 1 root zaz 4880 Oct  8  2015 exploit_me
+```
 
 We can see that the binary is setuid, so we can execute it as root. We can also see that the binary is owned by zaz, so we can try to exploit it.
 
@@ -756,3 +673,4 @@ root
 ```
 
 We are now root!
+
