@@ -712,6 +712,8 @@ We will now write a script that will reproduce the instructions given in the tur
   t.backward(200)
 ```
 
+We can make it automatically with sed [turtle.sh](./scripts/turtle.sh).
+
 The turtle is drawing the word SLASH, we will convert it to md5 and we will have the password for the zaz user.
 
 ```bash
