@@ -574,22 +574,33 @@ $ for f in ./*.txt; do echo $f; ./bomb $f | tail -1 | grep -v blown; done
 The README says:
 
 > HINT:
+>
 > P
+>
 > &nbsp;&nbsp;2
+>
 > &nbsp;&nbsp;b
 >
+>
 > o
+>
 > 4
+>
 >
 > NO SPACE IN THE PASSWORD (password is case sensitive).
 
 If we fill this up:
 
 > **P**ublic speaking is very easy.
+>
 > 1 **2** 6 24 120 720
+>
 > 1 **b** 214
+>
 > 9
+>
 > **o**pekmq
+>
 > **4** 2 6 3 1 5
 
 We remove the spaces and newlines:
