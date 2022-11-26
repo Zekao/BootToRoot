@@ -545,6 +545,10 @@ $ python3 ./scripts/bomb/step5.py
 
 ### Step 6
 
+| Exercice                          | Resolution Script                   |
+| --------------------------------- | ----------------------------------- |
+| [step6.c](./scripts/bomb/step6.c) | [step6.py](./scripts/bomb/step6.py) |
+
 For the step 6, we have multiple constraints:
 
 1. 6 digits separated by a space `%d %d %d %d %d %d`
@@ -593,6 +597,80 @@ We remove the spaces and newlines:
 > **Publicspeakingisveryeasy.126241207201b2149opekmq426135**
 
 ### Troubleshooting
+
+![Doesn't work](https://media.tenor.com/j5Q-_sP7SlwAAAAC/donald-trump-sounds-good.gif)
+
+This is not working... So let's try to investigate a bit more
+
+### Wut, a secret step?
+
+Let's dive into secret step. To access this stage, we need to understand the [phase_defused()](./scripts/bomb/x-secret.c):
+
+-   `num_input_strings == 6` ➡️ Checks if we have input 6 lines
+-   `sscanf(input_strings + 0xf0, "%d %s", local_58, local_54)` ➡️ Returns the first decimal and string from the 4th line (_complicated stuff to explain!_) of the total inputed strings
+-   `strings_not_equal(local_54, "austinpowers")` ➡️ Checks if the string found is `austinpowers`
+
+Modifying our previous entry should helps us:
+
+> **P**ublic speaking is very easy.
+> 1 **2** 6 24 120 720
+> 1 **b** 214
+> 9 **austinpowers** > **o**pekmq
+> **4** 2 6 3 1 5
+
+### Getting into secret step
+
+| Exercice                                | Resolution Script                         |
+| --------------------------------------- | ----------------------------------------- |
+| [x-secret.c](./scripts/bomb/x-secret.c) | [x-secret.py](./scripts/bomb/x-secret.py) |
+
+**The secret_phase is doing:**
+
+-   `uVar1 = read_line();` ➡️ read a line
+-   `iVar2 = __strtol_internal(uVar1, 0, 10, 0)` ➡️ transform it to a long
+-   `if (1000 < iVar2 - 1U) explode_bomb()` ➡️ explodes if the number is under 1001
+-   `iVar2 = fun7(n1, iVar2)` ➡️ execute function7 with **`n1`**
+-   `if (iVar2 != 7) explode_bomb()` ➡️ waits to receive 7 as a response. otherwise, it explodes
+
+n1 is basically just a linked list (_with 2 linked items_), get a look onto the Python script, you should understand it pretty easily!
+
+**The fun7 is doing:**
+
+-   `if (param_1 == (int *)0x0) iVar1 = -1` ➡️ if first argument is null : we store -1 in the function variable.
+-   `if (param_2 < *param_1) iVar1 = fun7(param_1[1], param_2) * 2` ➡️ if the number store in the chainlist is greater than the number passed in argument2: we make a recursion with the first item of the chainlist and we multiply it by 2.
+-   `if (param_2 == *param_1) iVar1 = 0` ➡️ if the numbers are equals: var func = 0
+-   `else iVar1 = fun7(param_1[2], param_2) * 2 + 1;` ➡️ Otherwise we make a recursion on the 2nd item of the chained list that we multiply by 2 and we add 1
+
+The python scripts is making a brutforce over all the possible solutions with it:
+
+```
+$ python3 ./scripts/bomb/x-secret.py
+4
+2
+6
+1
+5
+3
+```
+
+> The answer is
+> **426153**
+
+So the password of `thor` should be:
+
+> Publicspeakingisveryeasy.126241207201b2149opekmq426315426153
+
+![Good bye cruel world](https://media.tenor.com/MgMrZbxFbykAAAAd/kermit-fall-and-back.gif)
+
+Doesn't work... It becomes really long to explain, so here is the answer:
+
+1001 iterations (seems like a binary number) = **`9`**
+
+426153 seems like the answer for the step 6:
+`426315 - 426153 - 9 = 426135` really, don't ask any questions, we won't answer, it was frustrating and painfull...
+So:
+
+> Publicspeakingisveryeasy.126241207201b2149opekmq426135
 
 ## The Turtle
 
